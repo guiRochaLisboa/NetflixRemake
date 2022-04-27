@@ -44,7 +44,7 @@ public class MovieActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_arrow_back_24);
             getSupportActionBar().setTitle(null);
@@ -52,24 +52,24 @@ public class MovieActivity extends AppCompatActivity {
 
         LayerDrawable drawable = (LayerDrawable) ContextCompat.getDrawable(this, R.drawable.shadows);
 
-        if(drawable != null){
-            Drawable movieCover = ContextCompat.getDrawable(this,R.drawable.movie_4);
-            drawable.setDrawableByLayerId(R.id.cover_drawble,movieCover);
+        if (drawable != null) {
+            Drawable movieCover = ContextCompat.getDrawable(this, R.drawable.movie_4);
+            drawable.setDrawableByLayerId(R.id.cover_drawble, movieCover);
             ((ImageView) findViewById(R.id.image_view_cover)).setImageDrawable(drawable);
         }
 
         txtTitle.setText("Batman Bagins");
         txtDesc.setText("O JOVEM BRUCE É O BATMAN");
-        txtCast.setText(getString(R.string.cast,"Michael Jackson,Michael Jordan, Michael Kyle, Michael Bisping,e só"));
+        txtCast.setText(getString(R.string.cast, "Michael Jackson,Michael Jordan, Michael Kyle, Michael Bisping,e só"));
 
         List<Movie> movies = new ArrayList<>();
-        for (int i = 0; i < 30; i++){
+        for (int i = 0; i < 30; i++) {
             Movie movie = new Movie();
             movies.add(movie);
         }
 
         recyclerView.setAdapter(new MoviewAdapter(movies));
-        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
     }
 
     private static class MovieHolder extends RecyclerView.ViewHolder {

@@ -13,11 +13,12 @@ import android.widget.TextView;
 
 import com.example.netflixremake.model.Category;
 import com.example.netflixremake.model.Movie;
+import com.example.netflixremake.util.CategoryTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CategoryTask.CategoryLoader {
 
     private MainAdapter mainAdpater;
 
@@ -29,28 +30,20 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycler_view_main);
 
         List<Category> categories = new ArrayList<>();
-        for (int j = 0; j < 10; j++) {
-            Category category = new Category();
-            category.setName("cat" + j);
-
-            List<Movie> movies = new ArrayList<>();
-            for (int i = 0; i < 30; i++) {
-                Movie movie = new Movie();
-        //        movie.setCoverUrl(R.drawable.movie);
-                movies.add(movie);
-            }
-            category.setMovies(movies);
-            categories.add(category);
-
-        }
-
-
-
-
         mainAdpater = new MainAdapter(categories);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         recyclerView.setAdapter(mainAdpater);
 
+        CategoryTask categoryTask = new CategoryTask(this);
+        categoryTask.setCategoryLoader(this);
+        categoryTask.execute("https://tiagoaguiar.co/api/netflix/home");
+
+    }
+
+    @Override
+    public void onResult(List<Category> categories) {
+        mainAdpater.setCategorys(categories);
+        mainAdpater.notifyDataSetChanged();
     }
 
     private static class MovieHolder extends RecyclerView.ViewHolder {
@@ -63,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class CategoryHolder extends  RecyclerView.ViewHolder {
+    private static class CategoryHolder extends RecyclerView.ViewHolder {
 
         TextView textViewTitle;
         RecyclerView recyclerViewMovie;
@@ -77,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
     private class MainAdapter extends RecyclerView.Adapter<CategoryHolder> {
 
-        private final List<Category> categories;
+        private  List<Category> categories;
 
         private MainAdapter(List<Category> categories) {
             this.categories = categories;
@@ -94,12 +87,17 @@ public class MainActivity extends AppCompatActivity {
             Category category = categories.get(position);
             holder.textViewTitle.setText(category.getName());
             holder.recyclerViewMovie.setAdapter(new MoviewAdapter(category.getMovies()));
-            holder.recyclerViewMovie.setLayoutManager(new LinearLayoutManager(getBaseContext(),RecyclerView.HORIZONTAL,false));
+            holder.recyclerViewMovie.setLayoutManager(new LinearLayoutManager(getBaseContext(), RecyclerView.HORIZONTAL, false));
         }
 
         @Override
         public int getItemCount() {
             return categories.size();
+        }
+
+        void setCategorys(List<Category> categories) {
+            this.categories.clear();
+            this.categories.addAll(categories);
         }
     }
 
@@ -120,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull MovieHolder holder, int position) {
             Movie movie = movies.get(position);
-      //      holder.imageViewCover.setImageResource(movie.getCoverUrl());
+            //      holder.imageViewCover.setImageResource(movie.getCoverUrl());
         }
 
         @Override
