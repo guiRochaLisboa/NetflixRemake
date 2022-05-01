@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.example.netflixremake.model.Category;
 import com.example.netflixremake.model.Movie;
 import com.example.netflixremake.util.CategoryTask;
+import com.example.netflixremake.util.ImagerDonwloaderTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements CategoryTask.Cate
         CategoryTask categoryTask = new CategoryTask(this);
         categoryTask.setCategoryLoader(this);
         categoryTask.execute("https://tiagoaguiar.co/api/netflix/home");
+
 
     }
 
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements CategoryTask.Cate
         @Override
         public void onBindViewHolder(@NonNull MovieHolder holder, int position) {
             Movie movie = movies.get(position);
-            //      holder.imageViewCover.setImageResource(movie.getCoverUrl());
+            new ImagerDonwloaderTask(holder.imageViewCover).execute(movie.getCoverUrl());
         }
 
         @Override
