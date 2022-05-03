@@ -46,7 +46,7 @@ public class MovieDetailTask extends AsyncTask<String,Void, MovieDetail> {
         Context context = this.context.get();
 
         if (context != null) {
-            dialog = ProgressDialog.show(context, "Carregando", "TA CARREGANDO", true);
+            dialog = ProgressDialog.show(context, "Carregando", "carregando o filme aguarde...", true);
         }
     }
 

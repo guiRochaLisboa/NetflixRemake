@@ -51,7 +51,7 @@ public class CategoryTask extends AsyncTask<String, Void, List<Category>> {
         Context context = this.context.get();
 
         if (context != null) {
-            dialog = ProgressDialog.show(context, "Carregando", "TA CARREGANDO", true);
+            dialog = ProgressDialog.show(context, "Carregando", "", true);
         }
     }
 
