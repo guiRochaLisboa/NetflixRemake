@@ -11,18 +11,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.netflixremake.model.Category;
 import com.example.netflixremake.model.Movie;
+import com.example.netflixremake.model.MovieDetail;
+import com.example.netflixremake.util.MovieDetailTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieActivity extends AppCompatActivity {
+public class MovieActivity extends AppCompatActivity implements MovieDetailTask.MovieDetailLoader {
 
     private TextView txtTitle;
     private TextView txtDesc;
@@ -70,20 +74,36 @@ public class MovieActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(new MoviewAdapter(movies));
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+
+        int id = 1;
+        MovieDetailTask movieDetailTask = new MovieDetailTask(this);
+        movieDetailTask.setMovieDetailLoader(this);
+        movieDetailTask.execute("https://tiagoaguiar.co/api/netflix/2");
+    }
+
+    @Override
+    public void onResult(MovieDetail movieDetail) {
+        Log.i("Teste", movieDetail.toString());
     }
 
     private static class MovieHolder extends RecyclerView.ViewHolder {
 
         final ImageView imageViewCover;
 
-        public MovieHolder(@NonNull View itemView) {
+        public MovieHolder(@NonNull View itemView, final OnItemCLickListener onItemCLickListener) {
             super(itemView);
             imageViewCover = itemView.findViewById(R.id.image_view_cover);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemCLickListener.onClick(getAdapterPosition());
+                }
+            });
         }
     }
 
 
-    private class MoviewAdapter extends RecyclerView.Adapter<MovieActivity.MovieHolder> {
+    private class MoviewAdapter extends RecyclerView.Adapter<MovieActivity.MovieHolder> implements OnItemCLickListener {
 
         private final List<Movie> movies;
 
@@ -94,7 +114,8 @@ public class MovieActivity extends AppCompatActivity {
         @NonNull
         @Override
         public MovieActivity.MovieHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new MovieActivity.MovieHolder(getLayoutInflater().inflate(R.layout.movie_item_similar, parent, false));
+            View inflate = getLayoutInflater().inflate(R.layout.movie_item_similar,parent,false);
+            return new MovieActivity.MovieHolder(inflate, this);
         }
 
         @Override
@@ -107,6 +128,15 @@ public class MovieActivity extends AppCompatActivity {
         public int getItemCount() {
             return movies.size();
         }
+
+        @Override
+        public void onClick(int position) {
+
+        }
+    }
+
+    interface OnItemCLickListener {
+        void onClick(int position);
     }
 
 }

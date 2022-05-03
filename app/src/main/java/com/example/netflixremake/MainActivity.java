@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements CategoryTask.Cate
 
     }
 
+
     @Override
     public void onResult(List<Category> categories) {
         mainAdpater.setCategorys(categories);
