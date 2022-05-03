@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/cover_drawble"
-        android:drawable="@drawable/movie_4" />
+        android:drawable="@drawable/place_holder_bg" />
 
     <item android:id="@+id/gradient_drawable">
         <shape>

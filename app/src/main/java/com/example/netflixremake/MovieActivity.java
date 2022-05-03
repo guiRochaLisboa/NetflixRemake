@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import com.example.netflixremake.model.Category;
 import com.example.netflixremake.model.Movie;
 import com.example.netflixremake.model.MovieDetail;
+import com.example.netflixremake.util.ImagerDonwloaderTask;
 import com.example.netflixremake.util.MovieDetailTask;
 
 import java.util.ArrayList;
@@ -32,6 +34,8 @@ public class MovieActivity extends AppCompatActivity implements MovieDetailTask.
     private TextView txtDesc;
     private TextView txtCast;
     private RecyclerView recyclerView;
+    private MoviewAdapter movieAdapter;
+    private ImageView imageCover;
 
 
     @Override
@@ -43,6 +47,7 @@ public class MovieActivity extends AppCompatActivity implements MovieDetailTask.
         txtDesc = findViewById(R.id.text_view_desc);
         txtCast = findViewById(R.id.text_view_cast);
         recyclerView = findViewById(R.id.recycler_view_similar);
+        imageCover = findViewById(R.id.image_view_cover);
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -54,56 +59,60 @@ public class MovieActivity extends AppCompatActivity implements MovieDetailTask.
             getSupportActionBar().setTitle(null);
         }
 
-        LayerDrawable drawable = (LayerDrawable) ContextCompat.getDrawable(this, R.drawable.shadows);
-
-        if (drawable != null) {
-            Drawable movieCover = ContextCompat.getDrawable(this, R.drawable.movie_4);
-            drawable.setDrawableByLayerId(R.id.cover_drawble, movieCover);
-            ((ImageView) findViewById(R.id.image_view_cover)).setImageDrawable(drawable);
-        }
-
-        txtTitle.setText("Batman Bagins");
-        txtDesc.setText("O JOVEM BRUCE É O BATMAN");
-        txtCast.setText(getString(R.string.cast, "Michael Jackson,Michael Jordan, Michael Kyle, Michael Bisping,e só"));
 
         List<Movie> movies = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            Movie movie = new Movie();
-            movies.add(movie);
-        }
 
-        recyclerView.setAdapter(new MoviewAdapter(movies));
+        movieAdapter = new MoviewAdapter(movies);
+        recyclerView.setAdapter(movieAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-        int id = 1;
-        MovieDetailTask movieDetailTask = new MovieDetailTask(this);
-        movieDetailTask.setMovieDetailLoader(this);
-        movieDetailTask.execute("https://tiagoaguiar.co/api/netflix/2");
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            int id = extras.getInt("id");
+            MovieDetailTask movieDetailTask = new MovieDetailTask(this);
+            movieDetailTask.setMovieDetailLoader(this);
+            movieDetailTask.execute("https://tiagoaguiar.co/api/netflix/" + id);
+        }
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == android.R.id.home){
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onResult(MovieDetail movieDetail) {
-        Log.i("Teste", movieDetail.toString());
+        txtTitle.setText(movieDetail.getMovie().getTitle());
+        txtDesc.setText(movieDetail.getMovie().getDescription());
+        txtCast.setText(movieDetail.getMovie().getCast());
+
+        ImagerDonwloaderTask imagerDonwloaderTask = new ImagerDonwloaderTask(imageCover);
+        imagerDonwloaderTask.setShadowEnabled(true);
+        imagerDonwloaderTask.execute(movieDetail.getMovie().getCoverUrl());
+
+
+        movieAdapter.setMovies(movieDetail.getMovieSimilar());
+        movieAdapter.notifyDataSetChanged();
     }
 
     private static class MovieHolder extends RecyclerView.ViewHolder {
 
         final ImageView imageViewCover;
 
-        public MovieHolder(@NonNull View itemView, final OnItemCLickListener onItemCLickListener) {
+        public MovieHolder(@NonNull View itemView) {
             super(itemView);
             imageViewCover = itemView.findViewById(R.id.image_view_cover);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onItemCLickListener.onClick(getAdapterPosition());
-                }
-            });
+
         }
     }
 
 
-    private class MoviewAdapter extends RecyclerView.Adapter<MovieActivity.MovieHolder> implements OnItemCLickListener {
+    private class MoviewAdapter extends RecyclerView.Adapter<MovieActivity.MovieHolder> {
 
         private final List<Movie> movies;
 
@@ -111,17 +120,22 @@ public class MovieActivity extends AppCompatActivity implements MovieDetailTask.
             this.movies = movies;
         }
 
+        public void setMovies(List<Movie> movies){
+            this.movies.clear();
+            this.movies.addAll(movies);
+        }
+
         @NonNull
         @Override
         public MovieActivity.MovieHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View inflate = getLayoutInflater().inflate(R.layout.movie_item_similar,parent,false);
-            return new MovieActivity.MovieHolder(inflate, this);
+            View inflate = getLayoutInflater().inflate(R.layout.movie_item_similar, parent, false);
+            return new MovieActivity.MovieHolder(inflate);
         }
 
         @Override
         public void onBindViewHolder(@NonNull MovieActivity.MovieHolder holder, int position) {
             Movie movie = movies.get(position);
-            //      holder.imageViewCover.setImageResource(movie.getCoverUrl());
+            new ImagerDonwloaderTask(holder.imageViewCover).execute(movie.getCoverUrl());
         }
 
         @Override
@@ -129,14 +143,8 @@ public class MovieActivity extends AppCompatActivity implements MovieDetailTask.
             return movies.size();
         }
 
-        @Override
-        public void onClick(int position) {
 
-        }
     }
 
-    interface OnItemCLickListener {
-        void onClick(int position);
-    }
 
 }
