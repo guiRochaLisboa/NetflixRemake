@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NetflixRemake">
         <activity
-            android:name=".MovieActivity"
+            android:name=".kotlin.MovieActivity"
             android:exported="true">
         </activity>
         <activity

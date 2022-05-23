@@ -6,10 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.netflixremake.MovieActivity
 import com.example.netflixremake.R
 import com.example.netflixremake.model.Category
 import com.example.netflixremake.model.Movie
@@ -28,13 +26,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val categories = arrayListOf<Category>()
+        mainAdapter = MainAdapter(categories)
         recycler_view_main.adapter = mainAdapter
         recycler_view_main.layoutManager = LinearLayoutManager(this)
 
         val categoryTask = CategoryTask(this)
-        categoryTask.setCategoryLoader {
+        categoryTask.setCategoryLoader {categories ->
             mainAdapter.categories.clear()
-            mainAdapter.categories.addAll(it)
+            mainAdapter.categories.addAll(categories)
             mainAdapter.notifyDataSetChanged()
         }
         categoryTask.execute("https://tiagoaguiar.co/api/netflix/home")
@@ -56,10 +55,10 @@ class MainActivity : AppCompatActivity() {
 
     private inner class CategoryHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(category: Category) = with(itemView) {
-            text_view_title.text = category.name
+            text_view_item.text = category.name
             recycler_view_movie.adapter = MovieAdapter(category.movies){ movie ->
-                if (movie.id <= 3) {
-                   Toast.makeText(this@MainActivity,"ss",Toast.LENGTH_LONG).show()
+                if (movie.id > 3) {
+                   Toast.makeText(this@MainActivity,"Não foi implementado essa funcionalidade",Toast.LENGTH_LONG).show()
                 }else{
                     val intent = Intent(this@MainActivity, MovieActivity::class.java)
                     intent.putExtra("id",movie.id)
