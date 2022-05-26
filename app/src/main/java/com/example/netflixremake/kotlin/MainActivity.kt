@@ -8,14 +8,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.netflixremake.R
+import com.example.netflixremake.model.Categories
 import com.example.netflixremake.model.Category
 import com.example.netflixremake.model.Movie
-import com.example.netflixremake.util.CategoryTask
-import com.example.netflixremake.util.ImagerDonwloaderTask
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_movie.view.*
 import kotlinx.android.synthetic.main.category_item.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,13 +33,25 @@ class MainActivity : AppCompatActivity() {
         recycler_view_main.adapter = mainAdapter
         recycler_view_main.layoutManager = LinearLayoutManager(this)
 
-        val categoryTask = CategoryTask(this)
-        categoryTask.setCategoryLoader {categories ->
-            mainAdapter.categories.clear()
-            mainAdapter.categories.addAll(categories)
-            mainAdapter.notifyDataSetChanged()
-        }
-        categoryTask.execute("https://tiagoaguiar.co/api/netflix/home")
+
+        retrofit().create(NetflixAPI::class.java)
+            .listCategories()
+            .enqueue(object : Callback<Categories>{
+                override fun onResponse(call: Call<Categories>, response: Response<Categories>) {
+                    if(response.isSuccessful){
+                        response.body()?.let {
+                            mainAdapter.categories.clear()
+                            mainAdapter.categories.addAll(it.categories)
+                            mainAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<Categories>, t: Throwable) {
+                    Toast.makeText(this@MainActivity,t.message,Toast.LENGTH_SHORT).show()
+                }
+
+            })
     }
 
     private inner class MainAdapter(val categories: MutableList<Category>) :
@@ -73,8 +88,10 @@ class MainActivity : AppCompatActivity() {
     private class MovieHolder(itemView: View, val onClick: ((Movie) -> Unit)?) :
         RecyclerView.ViewHolder(itemView) {
         fun bind(movie: Movie) = with(itemView) {
-            ImagerDonwloaderTask(image_view_cover)
-                .execute(movie.coverUrl)
+            Glide.with(context)
+                .load(movie.coverUrl)
+                .placeholder(R.drawable.place_holder_bg)
+                .into(image_view_cover)
             image_view_cover.setOnClickListener {
                 onClick?.invoke(movie)
             }
